@@ -54,9 +54,9 @@ def runConversionJobs(chemCompVarFiles, scriptName):
 
     outputHandle = sys.__stdout__
 
-    while (currentProcesses):
+    while currentProcesses:
 
-        if startCode in currentProcesses.keys():
+        if startCode in currentProcesses:
             del(currentProcesses[startCode])
 
         if len(currentProcesses.keys()) < numCpu:
@@ -98,7 +98,7 @@ def runConversionJobs(chemCompVarFiles, scriptName):
         # Check if finished
         #
 
-        for chemCompVarFile in currentProcesses.keys():
+        for chemCompVarFile in currentProcesses:
 
             # Finished...
             if currentProcesses[chemCompVarFile].poll() != None:
@@ -127,8 +127,7 @@ if __name__ == '__main__':
             num = int(args[0][2:])
             ccpCodes = ccpCodes[:num]
         else:
-            args = list(set(eval(args[0])))
-            args.sort()
+            args = sorted(set(eval(args[0])))
             ccpCodes = args
 
     for ccpCode in ccpCodes:
@@ -138,14 +137,15 @@ if __name__ == '__main__':
 
         ccvNames = os.listdir(os.path.join('other', ccpCode))
 
-        for ccvName in  ccvNames:
-            if ccvName[-5:] == '.mol2' and not ccvName.count("bcc_gaff"):
-                chemCompVarFiles.append(os.path.join(curDir, 'other', ccpCode, ccvName))
-
+        chemCompVarFiles.extend(
+            os.path.join(curDir, 'other', ccpCode, ccvName)
+            for ccvName in ccvNames
+            if ccvName[-5:] == '.mol2' and not ccvName.count("bcc_gaff")
+        )
     runConversionJobs(chemCompVarFiles, 'acpype')
     execTime = int(round(time.time() - t0))
     msg = elapsedTime(execTime)
-    print("Total time of execution: %s" % msg)
+    print(f"Total time of execution: {msg}")
     print("ALL DONE")
 
 # nohup ./run_test_acpype_db_ligands.py &

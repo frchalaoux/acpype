@@ -315,10 +315,11 @@ def dotproduct(aa, bb):
 
 
 def crosproduct(a, b):
-    c = [a[1] * b[2] - a[2] * b[1],
-         a[2] * b[0] - a[0] * b[2],
-         a[0] * b[1] - a[1] * b[0]]
-    return c
+    return [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ]
 
 
 def length(v):
@@ -345,7 +346,7 @@ def imprDihAngle(a, b, c, d):
 
 def invalidArgs(text=None):
     if text:
-        print('ERROR: ' + text)
+        print(f'ERROR: {text}')
     sys.exit(1)
 
 # verNum = string.split(sys.version)[0]
@@ -411,8 +412,7 @@ def splitBlock(dat):
 
 
 def getParCode(line):
-    key = line.replace(' -', '-').replace('- ', '-').split()[0]
-    return key
+    return line.replace(' -', '-').replace('- ', '-').split()[0]
 
 
 def parseFrcmod(lista):
@@ -433,7 +433,7 @@ def parseFrcmod(lista):
             else:
                 dd[key] = [line]
             dict_[head] = dd
-    for k in dict_.keys():
+    for k in dict_:
         if not dict_[k]:
             dict_.pop(k)
     return dict_

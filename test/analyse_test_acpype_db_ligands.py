@@ -329,23 +329,15 @@ def parseSummurisedLine(warnTypes, errorTypes):
     if wt != ['']:
         wt = wt[1:]
         wt.sort(cmp=lambda x,y: int(x)-int(y))
-    warnTypes = ''
-    for i in wt:
-        if i: warnTypes += '_'+i
+    warnTypes = ''.join(f'_{i}' for i in wt if i)
     countWarn = warnTypes.count('_')
-    et = list(set(errorTypes.split('_')))
-    et.sort()
-    errorTypes = ''
-    for j in et:
-        if j: errorTypes += '_'+j
+    et = sorted(set(errorTypes.split('_')))
+    errorTypes = ''.join(f'_{j}' for j in et if j)
     countError = errorTypes.count('_')
     return "%i E, %i W, ET %s, WT %s" % (countError, countWarn, errorTypes, warnTypes)
 
 def parseChargeList(WT, dList):
-    listOk = []
-    for wt in WT:
-        if wt.split(':')[0] in dList:
-            listOk.append(wt)
+    listOk = [wt for wt in WT if wt.split(':')[0] in dList]
     listOk.sort()
     return listOk
 
@@ -354,13 +346,10 @@ def myComp(vx,vy):
     iy = int(vy.split()[0])
     tx = vx[-1:]
     ty = vy[-1:]
-    if tx.isdigit(): x = int(tx)
-    else: x = 0
-    if ty.isdigit(): y = int(ty)
-    else: y = 0
-
+    x = int(tx) if tx.isdigit() else 0
+    y = int(ty) if ty.isdigit() else 0
     if ix>iy:
-            return 1
+        return 1
     elif ix==iy:
         if x>y:
             return 1
@@ -368,13 +357,12 @@ def myComp(vx,vy):
             return 0
         else:
             return -1
+    elif x>y:
+        return 1
+    elif x==y:
+        return 0
     else:
-        if x>y:
-            return 1
-        elif x==y:
-            return 0
-        else:
-            return -1
+        return -1
 
 def sortList(lista,typeMess):
     for mol, l in mapResults[typeMess].items():

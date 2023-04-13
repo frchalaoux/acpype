@@ -131,11 +131,11 @@ for aai in seqi:
 
 def pdebug(msg):
     if debug:
-        print('DEBUG: %s' % msg)
+        print(f'DEBUG: {msg}')
 
 def perror(msg):
     if debug:
-        print('ERROR: %s' % msg)
+        print(f'ERROR: {msg}')
 
 def createAmberPdb(fpdb, opt):
     '''pdb -> apdb (amber)
@@ -143,48 +143,46 @@ def createAmberPdb(fpdb, opt):
        opt = 1 : ogpdb to apdb
     '''
     fLines = file(fpdb).readlines()
-    fName = 'a' + fpdb
-    famb = open(fName, 'w')
-    for line in fLines:
-        if 'ATOM  ' in line:
-            if opt == 0:
-                if 'AAA' not in fpdb:
-                    line = line.replace(' HB3 ', ' HB1 ')
-                line = line.replace('CD1 ILE', 'CD  ILE')
-                line = line.replace(' HG3 ', ' HG1 ')
-                line = line.replace(' HA3 GLY', ' HA1 GLY')
-                line = line.replace('HG13 ILE', 'HG11 ILE')
-                line = line.replace('HG13 ILE', 'HG11 ILE')
+    fName = f'a{fpdb}'
+    with open(fName, 'w') as famb:
+        for line in fLines:
+            if 'ATOM  ' in line:
+                if opt == 0:
+                    if 'AAA' not in fpdb:
+                        line = line.replace(' HB3 ', ' HB1 ')
+                    line = line.replace('CD1 ILE', 'CD  ILE')
+                    line = line.replace(' HG3 ', ' HG1 ')
+                    line = line.replace(' HA3 GLY', ' HA1 GLY')
+                    line = line.replace('HG13 ILE', 'HG11 ILE')
+                    line = line.replace('HG13 ILE', 'HG11 ILE')
+                    if line[22:26] == '   3':
+                        line = line.replace('  O  ', '  OC1').replace('  OXT', '  OC2')
+                elif opt == 1:
+                    if line[22:26] == '   3':
+                        line = line.replace(' O1 ', ' OC1').replace(' O2 ', ' OC2')
+                if line[22:26] == '   1':
+                    res = line[17:20]
+                    line = line.replace(f'{res} ', f'N{res}')
                 if line[22:26] == '   3':
-                    line = line.replace('  O  ', '  OC1').replace('  OXT', '  OC2')
-            elif opt == 1:
-                if line[22:26] == '   3':
-                    line = line.replace(' O1 ', ' OC1').replace(' O2 ', ' OC2')
-            if line[22:26] == '   1':
-                res = line[17:20]
-                line = line.replace('%s ' % res, 'N%s' % res)
-            if line[22:26] == '   3':
-                res = line[17:20]
-                line = line.replace('%s ' % res, 'C%s' % res)
-        famb.write(line) ### pay attention here!
-    famb.close()
+                    res = line[17:20]
+                    line = line.replace(f'{res} ', f'C{res}')
+            famb.write(line) ### pay attention here!
     return fName
 
 def createAmberPdb3(fpdb):
     '''Add N and C XXX --> NXXX, CXXX'''
     fLines = file(fpdb).readlines()
     fName = fpdb.replace('_', 'a')
-    famb = open(fName, 'w')
-    for line in fLines:
-        if 'ATOM  ' in line:
-            if line[22:26] == '   1':
-                res = line[17:20]
-                line = line.replace('%s ' % res, 'N%s' % res)
-            if line[22:26] == '   3':
-                res = line[17:20]
-                line = line.replace('%s ' % res, 'C%s' % res)
-        famb.write(line) ### pay attention here!
-    famb.close()
+    with open(fName, 'w') as famb:
+        for line in fLines:
+            if 'ATOM  ' in line:
+                if line[22:26] == '   1':
+                    res = line[17:20]
+                    line = line.replace(f'{res} ', f'N{res}')
+                if line[22:26] == '   3':
+                    res = line[17:20]
+                    line = line.replace(f'{res} ', f'C{res}')
+            famb.write(line) ### pay attention here!
     return fName
 
 def createAmberPdb2(fpdb, opt):
@@ -195,29 +193,28 @@ def createAmberPdb2(fpdb, opt):
     projectName = 'testImport'
     if os.path.exists(projectName):
         shutil.rmtree(projectName)
-    _fpdb = "_%s" % fpdb
+    _fpdb = f"_{fpdb}"
 
     fLines = file(_fpdb).readlines()
-    fName = 'a' + fpdb
-    famb = open(fName, 'w')
-    for line in fLines:
-        if 'ATOM  ' in line:
-            line = line.replace('CYS', 'CYN')
-            line = line.replace('LYS', 'LYP')
-            if opt == 0:
+    fName = f'a{fpdb}'
+    with open(fName, 'w') as famb:
+        for line in fLines:
+            if 'ATOM  ' in line:
+                line = line.replace('CYS', 'CYN')
+                line = line.replace('LYS', 'LYP')
+                if opt == 0:
+                    if line[22:26] == '   3':
+                        line = line.replace('  O   ', '  OC1 ').replace('  OXT ', '  OC2 ')
+                elif opt == 1:
+                    if line[22:26] == '   3':
+                        line = line.replace(' O1 ', ' OC1').replace(' O2 ', ' OC2')
+                if line[22:26] == '   1':
+                    res = line[17:20]
+                    line = line.replace(f'{res} ', f'N{res}')
                 if line[22:26] == '   3':
-                    line = line.replace('  O   ', '  OC1 ').replace('  OXT ', '  OC2 ')
-            elif opt == 1:
-                if line[22:26] == '   3':
-                    line = line.replace(' O1 ', ' OC1').replace(' O2 ', ' OC2')
-            if line[22:26] == '   1':
-                res = line[17:20]
-                line = line.replace('%s ' % res, 'N%s' % res)
-            if line[22:26] == '   3':
-                res = line[17:20]
-                line = line.replace('%s ' % res, 'C%s' % res)
-        famb.write(line) ### pay attention here!
-    famb.close()
+                    res = line[17:20]
+                    line = line.replace(f'{res} ', f'C{res}')
+            famb.write(line) ### pay attention here!
     return fName
 
 def createOldPdb2(fpdb):
@@ -254,12 +251,9 @@ def createOldPdb2(fpdb):
             , 'TRP':(defHB1, defHB2)
             , 'TYR':(defHB1, defHB2)
             }
-    fName = '_' + fpdb
+    fName = f'_{fpdb}'
     fLines = file(fpdb).readlines()
-    aLines = []
-    for line in fLines:
-        if 'ATOM  ' in line:
-            aLines.append(line)
+    aLines = [line for line in fLines if 'ATOM  ' in line]
     nRes = int(aLines[-1][22:26])
     nLines = []
     for line in aLines:
@@ -271,11 +265,11 @@ def createOldPdb2(fpdb):
             for at in item[:-1]:
                 #print(at, atAim)
                 #print(line)
-                line = line.replace('%s' % at, '%s' % atAim)
-                #print(line)
+                line = line.replace(f'{at}', f'{atAim}')
+                            #print(line)
         if nResCur == nRes:
-            line = line.replace('O   %s' % res, 'OC1 %s' % res)
-            line = line.replace('OXT %s' % res, 'OC2 %s' % res)
+            line = line.replace(f'O   {res}', f'OC1 {res}')
+            line = line.replace(f'OXT {res}', f'OC2 {res}')
         nLines.append(line)
     file(fName, 'w').writelines(nLines)
     return fName
@@ -312,7 +306,7 @@ def nbDict(lista):
         line = line.split(';')[0]
         line = line.strip()
         if line and not line.startswith('#') and not line.startswith('['):
-            name, type_ = line.split()[0:2]
+            name, type_ = line.split()[:2]
             tdict[name] = type_
     return tdict
 
@@ -384,14 +378,14 @@ def checkTopAcpype(res):
                 break
             except: pass
         if not found:
-            print("%s %s %s not found in %s Bon" % (dict_[l], ent, item, ffType))
+            print(f"{dict_[l]} {ent} {item} not found in {ffType} Bon")
         #print(item, e, par)
         return par
 
     compareParameters = True
 
-    agRes = parseTopFile(file('ag%s.top' % (res)).readlines())
-    acRes = parseTopFile(file('ag%s.acpype/ag%s_GMX.itp' % (res, res)).readlines())
+    agRes = parseTopFile(file(f'ag{res}.top').readlines())
+    acRes = parseTopFile(file(f'ag{res}.acpype/ag{res}_GMX.itp').readlines())
     _ffNb = aNb
     ffBon = aBon
     ffgRes = agRes
@@ -422,7 +416,7 @@ def checkTopAcpype(res):
     flags = [('pairs', 2), ('bonds', 2), ('angles', 3), ('dihedrals', 4)] #, ['dihedraltypes', 'angletypes', 'bondtypes']
 
     for flag, l in flags:
-        print("    ==> Comparing %s" % flag)
+        print(f"    ==> Comparing {flag}")
         if flag != flags[0][0] and compareParameters: # not 'pairs'
             agres = []
             tAgRes = ffgRes[0][flag] # e.g. dic 'bonds' from gmx top file
@@ -447,13 +441,12 @@ def checkTopAcpype(res):
         act = acres[:]
         agt = agres[:]
 
-        if compareParameters:
-            if flag != flags[0][0]:
-                # round parameters
-                act = roundAllFloats(act, l)
-                agt = roundAllFloats(agt, l)
-                act2 = act[:]
-                agt2 = agt[:]
+        if compareParameters and flag != flags[0][0]:
+            # round parameters
+            act = roundAllFloats(act, l)
+            agt = roundAllFloats(agt, l)
+            act2 = act[:]
+            agt2 = agt[:]
 
         if not compareParameters or flag == flags[0][0]:
             act2 = act[:]
@@ -519,10 +512,10 @@ def checkTopAcpype(res):
             print("    ac: ", act4)
         if agt4:
             agt4.sort()
-            print("    %sg: " % ff, agt4)
+            print(f"    {ff}g: ", agt4)
 
         if not act4 and not agt4:
-            print("        %s OK" % flag)
+            print(f"        {flag} OK")
 
 def parseOut(out):
     lines = out.splitlines()
@@ -545,9 +538,7 @@ def parseOut(out):
                 pass
             elif 'with zero occupancy' in line:
                 pass
-            elif 'check:  Warnings:' in line:
-                pass
-            else:
+            elif 'check:  Warnings:' not in line:
                 print(line)
         elif 'Total charge' in line:
             print("    ", line)
@@ -561,12 +552,11 @@ def parseOut(out):
 def fixRes4Acpype(fpdb):
     code = fpdb[2]
     fLines = file(fpdb).readlines()
-    famb = open(fpdb, 'w')
-    for line in fLines:
-        if 'ATOM  ' in line:
-            line = line[:17] + aa_dict[code].upper() + line[20:]
-        famb.write(line)
-    famb.close()
+    with open(fpdb, 'w') as famb:
+        for line in fLines:
+            if 'ATOM  ' in line:
+                line = line[:17] + aa_dict[code].upper() + line[20:]
+            famb.write(line)
 
 def build_residues_tleap():
     """Build residues tripeptides with tleap and minimise with sander"""
@@ -581,10 +571,10 @@ def build_residues_tleap():
         leapDict = {'amberff' : amberff, 'res' : res, 'aai3' : aai3, 'res1':res1}
         tleapin = genPdbTemplate % leapDict
         open('tleap.in', 'w').writelines(tleapin)
-        cmd = "%s -f tleap.in" % (tleapExe)
+        cmd = f"{tleapExe} -f tleap.in"
         _getoutput(cmd)
         #cmd = "%s -O; %s < restrt > %s.pdb; mv mdinfo %s.mdinfo" % (sanderExe, ambpdbExe, aai3, aai3) # -i mdin -o mdout -p prmtop -c inpcrd" % (sanderExe)
-        cmd = "%s -O; %s < restrt > %s.pdb" % (sanderExe, ambpdbExe, aai3)
+        cmd = f"{sanderExe} -O; {ambpdbExe} < restrt > {aai3}.pdb"
         _getoutput(cmd)
     _getoutput('rm -f mdout mdinfo mdin restrt tleap.in prmtop inpcrd leap.log')
 
@@ -677,8 +667,14 @@ if __name__ == '__main__':
 
     '''order: (tleap/EM or pymol) AAA.pdb -f-> _AAA.pdb -f-> aAAA.pdb --> (pdb2gmx) agAAA.pdb -f-> agAAA.pdb --> acpype
     '''
-    aNb = nbDict(file(gmxTopDir + '/gromacs/top/amber99sb.ff/ffnonbonded.itp').readlines())
-    aBon = parseTopFile(file(gmxTopDir + '/gromacs/top/amber99sb.ff/ffbonded.itp').readlines())
+    aNb = nbDict(
+        file(
+            f'{gmxTopDir}/gromacs/top/amber99sb.ff/ffnonbonded.itp'
+        ).readlines()
+    )
+    aBon = parseTopFile(
+        file(f'{gmxTopDir}/gromacs/top/amber99sb.ff/ffbonded.itp').readlines()
+    )
 
     tmpFile = 'tempScript.py'
     if not os.path.exists(tmpDir):
@@ -687,10 +683,9 @@ if __name__ == '__main__':
     os.system('rm -fr \#* *.acpype')
     #create res.pdb
     if usePymol:
-        ff = open(tmpFile, 'w')
-        ff.writelines(pymolScript)
-        ff.close()
-        cmd = "%s -qc %s" % (exePymol, tmpFile)
+        with open(tmpFile, 'w') as ff:
+            ff.writelines(pymolScript)
+        cmd = f"{exePymol} -qc {tmpFile}"
         os.system(cmd)
     else:
         build_residues_tleap()
@@ -707,9 +702,9 @@ if __name__ == '__main__':
             apdb = createAmberPdb3(_pdb) # create file aAAA.pdb with NXXX, CXXX
 
             # from ogpdb to amber pdb and top
-            agpdb = 'ag%s.pdb' % res # output name
-            agtop = 'ag%s.top' % res
-            cmd = ' %s -f %s -o %s -p %s -ff amber99sb %s' % (pdb2gmx, apdb, agpdb, agtop, water)
+            agpdb = f'ag{res}.pdb'
+            agtop = f'ag{res}.top'
+            cmd = f' {pdb2gmx} -f {apdb} -o {agpdb} -p {agtop} -ff amber99sb {water}'
             pdebug(cmd)
             out = _getoutput(cmd)
             #print(out)
@@ -733,7 +728,7 @@ if __name__ == '__main__':
             print("Compare ACPYPE x GMX AMBER99SB Pot. Energy (|ERROR|%)")
             # calc gmx amber energies
             dihAmb, dihAcp = calcGmxPotEnerDiff(res)
-            # calc gmx acpype energies
+                    # calc gmx acpype energies
 
     os.system('rm -f %s/\#* posre.itp tempScript.py' % tmpDir)
     os.system("find . -name 'ag*GMX*.itp' | xargs grep -v 'created by acpype on' > standard_ag_itp.txt")
